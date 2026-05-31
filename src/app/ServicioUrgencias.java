@@ -1,19 +1,13 @@
 package app;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
 
 import modelos.Paciente;
 import modelos.PacienteUrgencia;
 
 public class ServicioUrgencias {
 
-    private final PriorityQueue<PacienteUrgencia> cola = new PriorityQueue<>(
-            Comparator
-                    .comparingInt((PacienteUrgencia pu) -> pu.getNivelGravedad().getPrioridad())
-                    .thenComparingLong(PacienteUrgencia::getOrdenLlegada));
-    private long contadorLlegada = 0;
+    private final ArrayList<PacienteUrgencia> cola = new ArrayList<>();
 
     private final ServicioPacientes servicioPacientes;
 
@@ -29,7 +23,7 @@ public class ServicioUrgencias {
             return;
         }
 
-        PacienteUrgencia pu = new PacienteUrgencia(p, Formato.leerNivelGravedad(), contadorLlegada++);
+        PacienteUrgencia pu = new PacienteUrgencia(p, Formato.leerNivelGravedad());
         cola.add(pu);
         System.out.println("Registrado en urgencias: " + pu);
     }
@@ -40,23 +34,38 @@ public class ServicioUrgencias {
             return;
         }
 
-        ArrayList<PacienteUrgencia> ordenada = new ArrayList<>(cola);
-        ordenada.sort(
-                Comparator
-                        .comparingInt((PacienteUrgencia pu) -> pu.getNivelGravedad().getPrioridad())
-                        .thenComparingLong(PacienteUrgencia::getOrdenLlegada));
+        // Copiamos la lista para mostrarla ordenada sin tocar la original.
+        ArrayList<PacienteUrgencia> pendientes = new ArrayList<>(cola);
         System.out.println("-- Lista de espera (por prioridad) --");
         int pos = 1;
-        for (PacienteUrgencia pu : ordenada)
-            System.out.println(pos++ + ". " + pu);
+        while (!pendientes.isEmpty()) {
+            int idx = indiceMasGrave(pendientes);
+            System.out.println(pos++ + ". " + pendientes.get(idx));
+            pendientes.remove(idx);
+        }
     }
 
     public void atenderSiguiente() {
-        PacienteUrgencia pu = cola.poll();
-        if (pu == null) {
+        if (cola.isEmpty()) {
             System.out.println("No hay pacientes en espera.");
             return;
         }
+        int idx = indiceMasGrave(cola);
+        PacienteUrgencia pu = cola.remove(idx);
         System.out.println("Atendiendo a: " + pu);
+    }
+
+    // Devuelve la posición del paciente más grave (menor número de prioridad).
+    // Si hay empate, gana el que llegó antes (ocupa una posición anterior en la lista).
+    private int indiceMasGrave(ArrayList<PacienteUrgencia> lista) {
+        int idx = 0;
+        for (int i = 1; i < lista.size(); i++) {
+            int prioridadActual = lista.get(i).getNivelGravedad().getPrioridad();
+            int prioridadMejor = lista.get(idx).getNivelGravedad().getPrioridad();
+            if (prioridadActual < prioridadMejor) {
+                idx = i;
+            }
+        }
+        return idx;
     }
 }
