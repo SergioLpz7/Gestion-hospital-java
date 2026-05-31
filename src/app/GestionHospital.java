@@ -64,7 +64,7 @@ public class GestionHospital {
             switch (op) {
                 case 1 -> pacientes.crearCita();
                 case 2 -> pacientes.mostrarCitasDePaciente();
-                case 3 -> pacientes.mostrarTodasLasCitas();
+                case 3 -> { pacientes.mostrarTodasLasCitas(); Formato.pausa(); } 
                 case 0 -> volver = true;
                 default -> System.out.println("Opción no válida.");
             }
@@ -100,7 +100,7 @@ public class GestionHospital {
             int op = Formato.leerEntero("Opción: ");
             switch (op) {
                 case 1 -> personal.darAlta();
-                case 2 -> personal.mostrarTodos();
+                case 2 -> { personal.mostrarTodos(); Formato.pausa(); }
                 case 0 -> volver = true;
                 default -> System.out.println("Opción no válida.");
             }
